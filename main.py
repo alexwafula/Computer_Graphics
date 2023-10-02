@@ -1,22 +1,84 @@
 
 import os
 import pandas as pd
-import glob
+
+#Google drive package
+from googleapiclient.discovery import build
+from google.oauth2 import service_account
+from googleapiclient.http import MediaFileUpload
+
+import mimetypes
 
 from classes.generator_qn1 import Generator
 
-#data_directory = 'data'
-#jsonl_files = glob.glob(os.path.join(data_directory, '*.jsonl'))
 
-#with pd.ExcelWriter('MASSIVE.xlsx', engine='xlsxwriter') as writer:
-    # Iterate through each JSON Lines file, convert it to an Excel sheet, and save it
-#   [pd.read_json(jsonl_file, lines=True).to_excel(writer, sheet_name=os.path.splitext(os.path.basename(jsonl_file))[0], index=False) for jsonl_file in jsonl_files]
 
-# Save the Excel file
-print("Excel file saved as 'MASSIVE.xlsx'")
+#Generator.new_wonderful_function()
 
-#Generator.generate_language_columns('data//en-US.jsonl','data','file.xlsx')
+Generator.filter_separate('data//',['en-US.jsonl','de-DE.jsonl','sw-KE.jsonl'])
 
-Generator.new_wonderful_function('mi')
 
+#Generating the large json file 
+large_json_file={}
+#Prepear the dictionary
+english_data=pd.read_json('data//en-US.jsonl',lines=True)
+filtered_eng_data=english_data[english_data['partition']=='train']
+for i in filtered_eng_data.index:
+    translation=filtered_eng_data.loc[i,'utt']
+    lang_dic={
+        'id':i,
+        'eng': translation,
+        'translation':{}
+    }
+    large_json_file[i]=lang_dic
+
+list_of_files=os.listdir('data')
+for file_name in list_of_files:
+    language=file_name.split('.')[0]
+    if language!='en-US':
+        path=str('data//'+file_name)
+        data_frame=pd.read_json(path,lines=True)
+        filtered_data=data_frame[data_frame['partition']=='train']
+        for i in filtered_data.index:
+            translation=filtered_data.loc[i,'utt']
+            large_json_file[i]['translation'][language]=translation
+            
+
+#pretty printing the file
+Generator.pretty_print_approach1(large_json_file[7])
+
+
+#Uploading Files to google drive
+api_url=['https://www.googleapis.com/auth/drive']
+service_account_file='keys.json'
+parent_folder_id='15hQAbzVfDTgCB3-rXOW7DAVNFiyA4ENL'
+
+def auth():
+    creds=service_account.Credentials.from_service_account_file(service_account_file)
+    return creds
+
+def upload(path):
+    creds=auth()
+    service=build('drive','v3',credentials=creds)
+    filename=path.split('.')[0]
+    mime_type, _ = mimetypes.guess_type(path)
+    file_metadata= {
+        'name':filename,
+        'parents':[parent_folder_id]
+    }
+    # Create a media object for the file
+    media = MediaFileUpload(path, mimetype=mime_type)
+    file=service.files().create(
+        body=file_metadata,
+        media_body=media,
+        fields='id'
+    ).execute()
+
+#All files in directory
+files=os.listdir('.//generated_files')
+for file in files:
+    try:
+        upload('generated_files//'+file)
+    except:
+        print('Uploading file:'+(file)+' failed')
 
