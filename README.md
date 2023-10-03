@@ -1,4 +1,21 @@
+# Massive Dataset Mini Project
 
+## Importing Necessary Packages
+
+The code begins by importing several Python libraries and packages:
+
+- `pandas` for data manipulation and analysis.
+- `numpy` for numerical operations.
+- `os` for interacting with the operating system.
+- `json` for working with JSON data.
+
+It also imports specific modules from the `googleapiclient` and `google.oauth2` packages for Google Drive integration.
+
+```
+import pandas as pd
+import numpy as np
+import os
+import json
 
 from googleapiclient.discovery import build
 from google.oauth2 import service_account
