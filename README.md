@@ -1,4 +1,4 @@
-# Computer Graphics - Massive Data
+# Massive Dataset Mini Project
 
 ## Importing Necessary Packages
 
