@@ -3,7 +3,8 @@
 data/
 .ipynb_checkpoints/
 .idea/
-
+generated_files_qn1/
+generated_files/
 
 
 
