@@ -6,16 +6,22 @@ import pandas as pd
 from googleapiclient.discovery import build
 from google.oauth2 import service_account
 from googleapiclient.http import MediaFileUpload
-
 import mimetypes
+import subprocess as sp
+from classes.Functions import Functions
 
-from classes.generator_qn1 import Generator
+#Running the shell script
+os.popen('run.sh')
+# process= sp.run( 'run.sh', shell=True)
+# print(process.returncode)
+# if(int(process.returncode)==0):
+#     print('Shell script run successfully')
+# else:
+#     print('Shell script failed')
 
 
-
-#Generator.new_wonderful_function()
-
-Generator.filter_separate('data//',['en-US.jsonl','de-DE.jsonl','sw-KE.jsonl'])
+#Using English as the pivoit language
+Functions.filter_separate('data//',['en-US.jsonl','de-DE.jsonl','sw-KE.jsonl'])
 
 
 #Generating the large json file 
@@ -27,7 +33,7 @@ for i in filtered_eng_data.index:
     translation=filtered_eng_data.loc[i,'utt']
     lang_dic={
         'id':i,
-        'eng': translation,
+        'eng': str(translation),
         'translation':{}
     }
     large_json_file[i]=lang_dic
@@ -41,11 +47,11 @@ for file_name in list_of_files:
         filtered_data=data_frame[data_frame['partition']=='train']
         for i in filtered_data.index:
             translation=filtered_data.loc[i,'utt']
-            large_json_file[i]['translation'][language]=translation
+            large_json_file[i]['translation'][language]=str(translation)
             
 
 #pretty printing the file
-Generator.pretty_print_approach1(large_json_file[7])
+Functions.pretty_print_approach1(large_json_file[7])
 
 
 #Uploading Files to google drive
